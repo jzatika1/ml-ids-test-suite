@@ -67,7 +67,8 @@ Before starting the network monitor, it is crucial to train the machine learning
     Before training the models, you need to preprocess the data to ensure it's in the right format for training:
 
     ```shell
-    python multiprocess_combine.py
+	cd DataPreprocessing/
+    python main.py
     ```
 
     This script will combine and preprocess the necessary datasets using multiple processes to speed up the preparation.
@@ -75,7 +76,7 @@ Before starting the network monitor, it is crucial to train the machine learning
 2. **Navigate to the Training Program Directory:**
 
     ```shell
-    cd training_program
+	cd ModelTraining/
     ```
 
 3. **Train the Default XGBoost Model:**
@@ -94,4 +95,6 @@ Before starting the network monitor, it is crucial to train the machine learning
 To start monitoring, navigate back to the root directory and run the following command:
 
 ```shell
+cd NetworkMonitor
 sudo python main.py
+```
