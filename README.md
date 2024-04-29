@@ -1,3 +1,7 @@
+# Disclaimer: 
+We are currently working on providing the datasets used in the experiments on a hosting platform. Until this is completed, the data required for model training will not be accessible. Thank you for your patience.
+In the meantime, you can download the CICIDS'17 dataset and extract the CSV files into the data folder within DataPreprocessing.
+
 # Network Monitor with Anomaly Detection
 
 This repository hosts the code for a sophisticated network monitoring and anomaly detection system designed to identify malicious or anomalous network traffic using machine learning models. The system utilizes a modular architecture for ease of maintenance and scalability.
@@ -6,8 +10,7 @@ This repository hosts the code for a sophisticated network monitoring and anomal
 
 - Real-time monitoring of network logs.
 - Feature extraction from network traffic data.
-- Anomaly detection using machine learning models including KNN, XGBoost, and a custom Nearest Neighbors model.
-- Utilizes outlier detection algorithms to further analyze network traffic and identify potential threats.
+- Anomaly detection using machine learning models including Random Forests, Support Vector Machines, Neural Networks, and XGBoost.
 - Scalable architecture supporting asynchronous processing of network logs.
 
 ## Getting Started
@@ -41,6 +44,7 @@ Before installing the project dependencies, you need to have Conda installed. If
    Restart your terminal (or command prompt) and type the following command to see if Conda was installed correctly:
    ```shell
    conda --version
+   ```
 
 ### Installation
 
