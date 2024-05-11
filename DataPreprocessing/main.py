@@ -1,18 +1,22 @@
 import glob
 import os
 import numpy as np
+import pandas as pd
 from data_loading import load_files
-from data_preprocessing import simplify_attack_names
 from data_splitting import split_data
 from label_encoding import encode_labels
+
+# Set display options
+pd.set_option('display.float_format', '{:.2f}'.format)  # Adjust format as needed
+pd.set_option('display.max_rows', None)  # Ensures all rows are displayed
 
 if __name__ == "__main__":
     base_dir = 'data/'
     directories = [
         'UNSW-NB15',
-        'TON_IoT',
-        'CICIDS17',
-        'ROUTESMART'
+        #'TON_IoT',
+        #'CICIDS17',
+        #'ROUTESMART'
     ]
 
     filepaths = []
@@ -22,8 +26,9 @@ if __name__ == "__main__":
         filepaths.extend(glob.glob(csv_pattern))
         filepaths.extend(glob.glob(xlsx_pattern))
 
-    X_combined, y_combined = load_files(filepaths)
-    y_combined = simplify_attack_names(y_combined)
+    X_combined, y_combined, label_bytes = load_files(filepaths)
+
+    print(label_bytes)
 
     X_train, X_test, y_train, y_test = split_data(X_combined, y_combined)
     y_train_encoded, y_test_encoded = encode_labels(y_train, y_test)

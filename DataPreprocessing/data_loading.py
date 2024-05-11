@@ -42,7 +42,7 @@ def load_file(filepath):
             except ValueError as e:
                 try:
                     # Fallback to a secondary set of desired columns if there's an error
-                    desired_columns_secondary = ['dst_port', 'src_port', 'proto', 'dst_bytes', 'src_bytes', 'duration', 'type']
+                    desired_columns_secondary = ['dst_port', 'src_port', 'proto', 'dst_bytes', 'src_bytes', 'dst_ip_bytes', 'src_ip_bytes', 'duration', 'type']
                     data = pd.read_csv(filepath, usecols=desired_columns_secondary, low_memory=False, encoding="ISO-8859-1")
                     
                     # Rename columns to match the desired format
@@ -52,10 +52,19 @@ def load_file(filepath):
                         'proto': 'Protocol', 
                         'dst_bytes': 'Total Fwd Bytes', 
                         'src_bytes': 'Total Bwd Bytes',
+                        'dst_ip_bytes': 'Fallback Fwd Bytes',  # Temporarily store as a new column
+                        'src_ip_bytes': 'Fallback Bwd Bytes',  # Temporarily store as a new column
                         'duration': 'Flow Duration', 
                         'type': 'Label'
                     }
                     data.rename(columns=rename_mapping, inplace=True)
+                
+                    # Check if both src_bytes and dst_bytes are 0, then fallback to src_ip_bytes and dst_ip_bytes
+                    data.loc[(data['Total Fwd Bytes'] == 0) & (data['Total Bwd Bytes'] == 0), 'Total Fwd Bytes'] = data['Fallback Fwd Bytes']
+                    data.loc[(data['Total Fwd Bytes'] == 0) & (data['Total Bwd Bytes'] == 0), 'Total Bwd Bytes'] = data['Fallback Bwd Bytes']
+                
+                    # Optionally, drop the Fallback columns if they are no longer needed
+                    data.drop(['Fallback Fwd Bytes', 'Fallback Bwd Bytes'], axis=1, inplace=True)
                 except ValueError as e:
                     # Fallback to a third set of desired columns if there's an error
                     desired_columns_third = ['target_port', 'client_port', 'request_proto', 'request_processing_time', 'target_processing_time', 'response_processing_time', 'received_bytes', 'sent_bytes']
@@ -204,9 +213,50 @@ def concatenate_results(results):
 
     return X_combined, y_combined
 
+def simplify_attack_names(y):
+    def map_web_attack(label):
+        if 'Web Attack' in label:
+            return 'Web Attack'
+        return label
+
+    attack_map = {
+        'DoS Hulk': 'Dos Attack',
+        'DoS GoldenEye': 'Dos Attack',
+        'DoS slowloris': 'Dos Attack',
+        'DoS Slowhttptest': 'Dos Attack',
+        'DDoS': 'Dos Attack',
+        'ddos': 'Dos Attack',
+        'dos': 'Dos Attack',
+        'Web Attack': 'Web Attack',
+        'xss': 'Web Attack',
+        'injection': 'Web Attack',
+        'PortScan': 'Scanning And Probing',
+        'scanning': 'Scanning And Probing',
+        'FTP-Patator': 'Brute Force Attack',
+        'SSH-Patator': 'Brute Force Attack',
+        'password': 'Brute Force Attack',
+    }
+
+    return y.map(map_web_attack).map(attack_map).fillna(y).str.title()
+
 def load_files(filepaths):
     with Pool(processes=cpu_count()) as pool:
         results = pool.map(load_file, filepaths)
-    
+
     X_combined, y_combined = concatenate_results(results)
-    return X_combined, y_combined
+
+    # Simplify attack names in y_combined
+    y_simplified = simplify_attack_names(y_combined)
+
+    # Temporarily add simplified 'Label' to X_combined for calculating total bytes
+    X_combined['Label'] = y_simplified.values
+
+    # Calculate total bytes for each label
+    X_combined['Total Bytes'] = X_combined['Total Fwd Bytes'] + X_combined['Total Bwd Bytes']
+    label_bytes = X_combined.groupby('Label')['Total Bytes'].sum()
+
+    # Remove 'Label' column before returning
+    X_combined.drop('Label', axis=1, inplace=True)
+
+    # Return simplified y_combined as well
+    return X_combined, y_simplified, label_bytes

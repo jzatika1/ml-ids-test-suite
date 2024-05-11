@@ -2,8 +2,10 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Dropout, Input
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.regularizers import l2
+from tensorflow.keras.layers import BatchNormalization
 
 def train_neural_network(X_train, y_train):
+    
     
     # Define the model architecture
     model = Sequential([
