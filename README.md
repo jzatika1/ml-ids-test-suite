@@ -106,6 +106,29 @@ Before installing the project dependencies, you need to have Conda installed. If
     conda activate ml-ids-env
     ```
 
+### Downloading Datasets
+
+To run this program, you'll need to download several datasets from Kaggle. Below are the steps to download these datasets:
+
+1. If you don't already have a Kaggle account, you will need to create one. Go to [Kaggle](https://www.kaggle.com) and sign up.
+
+2. Once you have a Kaggle account, use the following links to access each dataset. Click the "Download" button on the dataset page to download the zip files:
+
+- **RouteSmart Dataset:** [Download Link](https://www.kaggle.com/datasets/janthonyzatika/routesmart)
+- **CICIDS2017 Dataset:** [Download Link](https://www.kaggle.com/datasets/cicdataset/cicids2017/)
+- **ToN_IoT Train-Test Network Dataset:** [Download Link](https://www.kaggle.com/datasets/fadiabuzwayed/ton-iot-train-test-network)
+- **UNSW-NB15 Dataset:** [Download Link](https://www.kaggle.com/datasets/mrwellsdavid/unsw-nb15)
+
+3. After downloading, unzip each dataset. Move the CSV files (or other relevant files, depending on the dataset structure) into the following folder within your local repository:
+
+	```shell
+	cd ml-ids-test-suite1/DataPreprocessing/data/
+	```
+
+Ensure that this folder structure exists, or create it if necessary.
+
+4. Make sure that all dataset files are correctly placed in the `data` folder. The program will expect to find them there.
+
 ### Model Training
 
 Before starting the network monitor, it is crucial to train the machine learning models.
