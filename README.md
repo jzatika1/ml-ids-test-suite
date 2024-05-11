@@ -125,8 +125,6 @@ To run this program, you'll need to download several datasets from Kaggle. Below
 	cd ml-ids-test-suite1/DataPreprocessing/data/
 	```
 
-Ensure that this folder structure exists, or create it if necessary.
-
 4. Make sure that all dataset files are correctly placed in the `data` folder. The program will expect to find them there.
 
 ### Model Training
