@@ -46,6 +46,50 @@ Before installing the project dependencies, you need to have Conda installed. If
    conda --version
    ```
 
+### Installing Zeek
+
+1. Ensure your system is supported (Linux, macOS).
+2. Install necessary dependencies through your package manager.
+3. Download Zeek from [Zeek.org](https://zeek.org/get-zeek/) or install via package manager.
+4. Follow the detailed installation instructions provided on the Zeek website or through the installation package.
+
+### Configuring Zeek as a System Service
+
+1. To configure Zeek as a service, create a new service file at `/etc/systemd/system/zeek.service` with the following content:
+
+	```ini
+	[Unit]
+	Description=Zeek Network Intrusion Detection System (NIDS)
+	After=network.target
+
+	[Service]
+	Type=forking
+	User=root
+	Group=zeek
+	Environment=HOME=/nsm/zeek/spool
+	ExecStart=/opt/zeek/bin/zeekctl deploy
+	ExecStop=/opt/zeek/bin/zeekctl stop
+
+	[Install]
+	WantedBy=multi-user.target
+	```
+
+2. Enable and start the service:
+	```bash
+	sudo systemctl enable zeek
+	sudo systemctl start zeek
+	```
+
+### Configure Network Settings in Zeek
+
+1. Modify the `node.cfg` file to specify your network interface:
+
+	```bash
+	sudo nano /opt/zeek/etc/node.cfg
+	```
+
+2. Change the `interface` setting to match your network interface (e.g., `eth0`).
+
 ### Installation
 
 1. Clone the repository to your local machine:
