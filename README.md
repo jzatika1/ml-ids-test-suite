@@ -1,7 +1,3 @@
-# Disclaimer: 
-We are currently working on providing the datasets used in the experiments on a hosting platform. Until this is completed, the data required for model training will not be accessible. Thank you for your patience.
-In the meantime, you can download the CICIDS'17 dataset and extract the CSV files into the data folder within DataPreprocessing.
-
 # Network Monitor with Anomaly Detection
 
 This repository hosts the code for a sophisticated network monitoring and anomaly detection system designed to identify malicious or anomalous network traffic using machine learning models. The system utilizes a modular architecture for ease of maintenance and scalability.
