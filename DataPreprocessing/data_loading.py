@@ -258,5 +258,8 @@ def load_files(filepaths):
     # Remove 'Label' column before returning
     X_combined.drop('Label', axis=1, inplace=True)
 
+    # Remove 'Total Bytes' column before returning
+    X_combined.drop('Total Bytes', axis=1, inplace=True)
+
     # Return simplified y_combined as well
     return X_combined, y_simplified, label_bytes
