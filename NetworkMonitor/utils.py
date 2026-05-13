@@ -1,7 +1,13 @@
-import json
 import ipaddress
+import json
+import logging
+from pathlib import Path
+from typing import Any
 
-def to_numeric(value, default=0):
+logger = logging.getLogger(__name__)
+
+
+def to_numeric(value: Any, default=0):
     """
     Safely convert a string to an integer or float. If conversion fails, return a default value.
 
@@ -12,13 +18,24 @@ def to_numeric(value, default=0):
     Returns:
     - int or float, the converted number or the default value.
     """
+    if value is None:
+        return default
+
+    if isinstance(value, (int, float)):
+        return value
+
+    value = str(value).strip()
+    if value in {"", "-", "(empty)"}:
+        return default
+
     try:
         return int(value)
-    except ValueError:
+    except (TypeError, ValueError):
         try:
             return float(value)
-        except ValueError:
+        except (TypeError, ValueError):
             return default
+
 
 def ip_to_int(ip_str):
     """
@@ -35,6 +52,7 @@ def ip_to_int(ip_str):
     except ValueError:
         return 0
 
+
 def load_mappings(filepath):
     """
     Load JSON-encoded data from a file.
@@ -45,15 +63,17 @@ def load_mappings(filepath):
     Returns:
     - dict, the data loaded from the JSON file.
     """
+    path = Path(filepath)
     try:
-        with open(filepath, 'r') as file:
+        with path.open("r", encoding="utf-8") as file:
             return json.load(file)
     except FileNotFoundError:
-        print(f"File not found: {filepath}")
+        logger.warning("Mapping file not found: %s", path)
         return {}
     except json.JSONDecodeError:
-        print(f"Error decoding JSON from {filepath}")
+        logger.warning("Error decoding JSON from %s", path)
         return {}
+
 
 def save_mappings(data, filepath):
     """
@@ -63,8 +83,10 @@ def save_mappings(data, filepath):
     - data: dict, the data to save.
     - filepath: str, the path to the JSON file where data will be saved.
     """
+    path = Path(filepath)
     try:
-        with open(filepath, 'w') as file:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        with path.open("w", encoding="utf-8") as file:
             json.dump(data, file, indent=4)
-    except Exception as e:
-        print(f"Error saving to {filepath}: {e}")
+    except OSError as exc:
+        logger.error("Error saving mapping data to %s: %s", path, exc)

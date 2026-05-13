@@ -1,17 +1,30 @@
-import os
+from pathlib import Path
+
+import xgboost as xgb
 from joblib import dump
-from tensorflow.keras.models import Model
 
-def export_model(model, model_name, model_dir='../NetworkMonitor/models/'):
-    os.makedirs(model_dir, exist_ok=True)  # Ensure the directory exists
-    model_path = os.path.join(model_dir, f"{model_name}.joblib")
+try:
+    from tensorflow.keras.models import Model as KerasModel
+except ImportError:  # pragma: no cover - optional deep-learning dependency
+    KerasModel = None
 
-    if isinstance(model, Model):
-        # TensorFlow/Keras model
-        model_path = os.path.join(model_dir, f"{model_name}.h5")
+
+DEFAULT_MODEL_DIR = Path(__file__).resolve().parents[2] / "NetworkMonitor" / "models"
+
+
+def export_model(model, model_name, model_dir=DEFAULT_MODEL_DIR):
+    model_dir = Path(model_dir)
+    model_dir.mkdir(parents=True, exist_ok=True)
+
+    if isinstance(model, xgb.Booster):
+        model_path = model_dir / f"{model_name}.json"
+        model.save_model(str(model_path))
+    elif KerasModel is not None and isinstance(model, KerasModel):
+        model_path = model_dir / f"{model_name}.keras"
         model.save(model_path)
     else:
-        # Other models like xgboost, sklearn etc.
+        model_path = model_dir / f"{model_name}.joblib"
         dump(model, model_path)
-    
+
     print(f"Saved {model_name} model to {model_path}.")
+    return model_path

@@ -1,6 +1,11 @@
-from joblib import load
-import os
 import logging
+from pathlib import Path
+
+import xgboost as xgb
+from joblib import load
+
+logger = logging.getLogger(__name__)
+
 
 def load_models(models_directory):
     """
@@ -13,17 +18,24 @@ def load_models(models_directory):
     - models: dict, a dictionary mapping model names to their loaded instances.
     """
     models = {}
-    if not os.path.isdir(models_directory):
-        logging.error(f"Models directory does not exist: {models_directory}")
+    models_path = Path(models_directory)
+    if not models_path.is_dir():
+        logger.error("Models directory does not exist: %s", models_path)
         return models
 
-    for filename in os.listdir(models_directory):
-        if filename.endswith(".joblib") or filename.endswith(".pkl"):
-            model_path = os.path.join(models_directory, filename)
-            try:
-                model_name = filename.rsplit('.', 1)[0]  # Remove the file extension to get the model name
-                models[model_name] = load(model_path)
-                logging.info(f"{model_name} model loaded successfully from {model_path}.")
-            except Exception as e:
-                logging.error(f"Failed to load model {filename} due to an error: {e}")
+    for model_path in sorted(models_path.iterdir()):
+        if model_path.suffix not in {".joblib", ".json", ".pkl"}:
+            continue
+
+        try:
+            model_name = model_path.stem
+            if model_path.suffix == ".json":
+                booster = xgb.Booster()
+                booster.load_model(str(model_path))
+                models[model_name] = booster
+            else:
+                models[model_name] = load(str(model_path))
+            logger.info("%s model loaded successfully from %s.", model_name, model_path)
+        except Exception as exc:
+            logger.error("Failed to load model %s: %s", model_path.name, exc)
     return models

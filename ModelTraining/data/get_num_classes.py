@@ -1,24 +1,20 @@
-import os
 import json
+from pathlib import Path
 
-def num_classes():
-    # Relative path to your mappings directory
-    mappings_dir_path = '../DataPreprocessing/model_mappings/'
+DEFAULT_MAPPINGS_DIR = Path(__file__).resolve().parents[2] / "DataPreprocessing" / "model_mappings"
 
-    # Get the absolute path to the mappings directory
-    absolute_mappings_dir_path = os.path.abspath(mappings_dir_path)
 
-    # Find the first JSON file in the directory
-    json_file = next((file for file in os.listdir(absolute_mappings_dir_path) if file.endswith('.json')), None)
-
-    if json_file:
-        # Load mappings file
-        with open(os.path.join(absolute_mappings_dir_path, json_file), 'r') as f:
-            mappings = json.load(f)
-
-        # Determine the number of unique classes from the mappings
-        num_classes = len(mappings)
-        return num_classes
+def num_classes(mappings_dir=DEFAULT_MAPPINGS_DIR):
+    mappings_path = Path(mappings_dir)
+    if mappings_path.is_file():
+        json_path = mappings_path
     else:
-        print("No JSON file found in the directory.")
-        return None
+        json_path = next(iter(sorted(mappings_path.glob("*.json"))), None)
+
+    if json_path is None:
+        raise FileNotFoundError(f"No mapping JSON file found in {mappings_path}.")
+
+    with json_path.open("r", encoding="utf-8") as file:
+        mappings = json.load(file)
+
+    return len(mappings)

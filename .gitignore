@@ -126,3 +126,18 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Project runtime artifacts
+DataPreprocessing/data/*
+!DataPreprocessing/data/README.md
+DataPreprocessing/preprocessed_data/*
+!DataPreprocessing/preprocessed_data/README.md
+DataPreprocessing/model_mappings/*
+!DataPreprocessing/model_mappings/README.md
+NetworkMonitor/models/
+NetworkMonitor/logs/
+logs/
+*.db
+*.sqlite
+*.sqlite3
+latest_study_results.csv

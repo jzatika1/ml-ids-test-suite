@@ -1,165 +1,110 @@
-# Network Monitor with Anomaly Detection
+# ML IDS Test Suite
 
-This repository hosts the code for a sophisticated network monitoring and anomaly detection system designed to identify malicious or anomalous network traffic using machine learning models. The system utilizes a modular architecture for ease of maintenance and scalability.
+Machine-learning intrusion detection research code presented at the **2024 IEEE/ACM 17th International Conference on Utility and Cloud Computing (UCC 2024)** in the paper:
 
-## Features
+**Improving IDS Performance with XGBoost Hyperparameter Optimization and Real-Time Analysis**  
+Anthony Zatika and Joel Coffman  
+DOI: `10.1109/UCC63386.2024.00037`
 
-- Real-time monitoring of network logs.
-- Feature extraction from network traffic data.
-- Anomaly detection using machine learning models including Random Forests, Support Vector Machines, Neural Networks, and XGBoost.
-- Scalable architecture supporting asynchronous processing of network logs.
+This repository focuses on practical network IDS experimentation: dataset normalization, XGBoost training, hyperparameter optimization, and realtime Zeek `conn.log` analysis.
 
-## Getting Started
+## What This Repo Does
 
-Before running any of the files, ensure you set up the environment and models as described. Follow the steps below:
+- Normalizes IDS datasets into a compact shared feature contract.
+- Trains XGBoost, Random Forest, SVM, and optional TensorFlow baselines.
+- Tunes XGBoost hyperparameters with Optuna.
+- Exports trained models for realtime monitoring.
+- Scores Zeek connection logs with the same feature layout used during training.
+- Optionally enriches realtime decisions with AbuseIPDB reputation data.
 
-### Prerequisites
+## Repository Layout
 
-Before installing the project dependencies, you need to have Conda installed. If you do not have Conda installed, you can install Miniconda by following these steps:
-
-1. **Download Miniconda Installer:**
-   Go to the [Miniconda download page](https://docs.conda.io/en/latest/miniconda.html) and download the appropriate installer for your operating system.
-
-   - **Windows:** Download the `.exe` file and open it to start the installer.
-   - **macOS:** Download the `.pkg` file for a graphical installer or the `.sh` file for a command line installation.
-   - **Linux:** Download the `.sh` file.
-
-2. **Install Miniconda:**
-   Open a terminal (or command prompt on Windows) and navigate to the directory where the downloaded file is located.
-
-   - **For macOS and Linux:**
-     ```shell
-     bash Miniconda3-latest-Linux-x86_64.sh  # Adjust the filename as needed
-     ```
-     Follow the on-screen instructions. It is recommended to allow the installer to initialize Miniconda by running `conda init`.
-
-   - **For Windows:**
-     Double-click the downloaded `.exe` file and follow the on-screen instructions.
-
-3. **Verify Installation:**
-   Restart your terminal (or command prompt) and type the following command to see if Conda was installed correctly:
-   ```shell
-   conda --version
-   ```
-
-### Installing Zeek
-
-1. Ensure your system is supported (Linux, macOS).
-2. Install necessary dependencies through your package manager.
-3. Download Zeek from [Zeek.org](https://zeek.org/get-zeek/) or install via package manager.
-4. Follow the detailed installation instructions provided on the Zeek website or through the installation package.
-
-### Configuring Zeek as a System Service
-
-1. To configure Zeek as a service, create a new service file at `/etc/systemd/system/zeek.service` with the following content:
-
-	```ini
-	[Unit]
-	Description=Zeek Network Intrusion Detection System (NIDS)
-	After=network.target
-
-	[Service]
-	Type=forking
-	User=root
-	Group=zeek
-	Environment=HOME=/nsm/zeek/spool
-	ExecStart=/opt/zeek/bin/zeekctl deploy
-	ExecStop=/opt/zeek/bin/zeekctl stop
-
-	[Install]
-	WantedBy=multi-user.target
-	```
-
-2. Enable and start the service:
-	```bash
-	sudo systemctl enable zeek
-	sudo systemctl start zeek
-	```
-
-### Configure Network Settings in Zeek
-
-1. Modify the `node.cfg` file to specify your network interface:
-
-	```bash
-	sudo nano /opt/zeek/etc/node.cfg
-	```
-
-2. Change the `interface` setting to match your network interface (e.g., `eth0`).
-
-### Installation
-
-1. Clone the repository to your local machine:
-
-    ```shell
-    git clone https://github.com/jzatika1/ml-ids-test-suite.git
-    cd ml-ids-test-suite
-    ```
-
-2. Install the required environment:
-
-    ```shell
-    conda env create -f environment.yml
-    conda activate ml-ids-env
-    ```
-
-### Downloading Datasets
-
-To run this program, you'll need to download several datasets from Kaggle. Below are the steps to download these datasets:
-
-1. If you don't already have a Kaggle account, you will need to create one. Go to [Kaggle](https://www.kaggle.com) and sign up.
-
-2. Once you have a Kaggle account, use the following links to access each dataset. Click the "Download" button on the dataset page to download the zip files:
-
-- **RouteSmart Dataset:** [Download Link](https://www.kaggle.com/datasets/janthonyzatika/routesmart)
-- **CICIDS2017 Dataset:** [Download Link](https://www.kaggle.com/datasets/cicdataset/cicids2017/)
-- **ToN_IoT Train-Test Network Dataset:** [Download Link](https://www.kaggle.com/datasets/fadiabuzwayed/ton-iot-train-test-network)
-- **UNSW-NB15 Dataset:** [Download Link](https://www.kaggle.com/datasets/mrwellsdavid/unsw-nb15)
-
-3. After downloading, unzip each dataset. Move the CSV files (or other relevant files, depending on the dataset structure) into the following folder within your local repository:
-
-	```shell
-	cd ml-ids-test-suite1/DataPreprocessing/data/
-	```
-
-4. Make sure that all dataset files are correctly placed in the `data` folder. The program will expect to find them there.
-
-### Model Training
-
-Before starting the network monitor, it is crucial to train the machine learning models.
-
-1. **Prepare the Data:**
-
-    Before training the models, you need to preprocess the data to ensure it's in the right format for training:
-
-    ```shell
-	cd DataPreprocessing/
-    python main.py
-    ```
-
-    This script will combine and preprocess the necessary datasets using multiple processes to speed up the preparation.
-
-2. **Navigate to the Training Program Directory:**
-
-    ```shell
-	cd ModelTraining/
-    ```
-
-3. **Train the Default XGBoost Model:**
-
-    ```shell
-    python main.py
-    ```
-
-    If you wish to train other models like SVM, Random Forests, or Neural Networks:
-
-    - Edit the `config.ini` file within the `training_program/config` directory.
-    - Set the appropriate model to `True` under the `[models]` section to enable training.
-
-### Running the Monitor
-
-To start monitoring, navigate back to the root directory and run the following command:
-
-```shell
-cd NetworkMonitor
-sudo python main.py
+```text
+DataPreprocessing/          Dataset loading, cleaning, label encoding, splits
+ModelTraining/              Model training, evaluation, and export
+HyperparameterOptimization/ Optuna-based XGBoost tuning
+NetworkMonitor/             Realtime Zeek conn.log scoring
+docs/                       Architecture and conference context
+tests/                      Unit tests for core feature and evaluation behavior
 ```
+
+## Setup
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install -r requirements-dev.txt
+```
+
+The historical Conda environment is still available in `environment.yml`, but the lightweight `requirements*.txt` files are the recommended starting point for local development and CI.
+
+## Data
+
+Place downloaded datasets under `DataPreprocessing/data/`. The original experiments used public IDS datasets such as CICIDS2017, UNSW-NB15, ToN-IoT, and related traffic captures. Large datasets and generated preprocessing outputs are intentionally ignored by Git.
+
+```bash
+python DataPreprocessing/main.py
+```
+
+This generates:
+
+- `DataPreprocessing/preprocessed_data/X_train_stratify.csv`
+- `DataPreprocessing/preprocessed_data/X_test_stratify.csv`
+- `DataPreprocessing/preprocessed_data/y_train_encoded_stratify.csv`
+- `DataPreprocessing/preprocessed_data/y_test_encoded_stratify.csv`
+- `DataPreprocessing/model_mappings/mappings.json`
+
+## Train
+
+```bash
+python -m ModelTraining.main
+```
+
+XGBoost uses CPU-friendly defaults. To use a CUDA-capable XGBoost install:
+
+```bash
+XGBOOST_DEVICE=cuda python -m ModelTraining.main
+```
+
+To enable RAPIDS cuML for Random Forest or SVM:
+
+```bash
+USE_CUML=true python -m ModelTraining.main
+```
+
+## Optimize XGBoost
+
+```bash
+python HyperparameterOptimization/optuna_gpu.py --n-trials 100 --device cpu
+```
+
+Use `--device cuda` only when XGBoost is installed with compatible GPU support.
+
+## Run Realtime Monitoring
+
+Install and run Zeek separately, then point the monitor at the active log directory:
+
+```bash
+python -m NetworkMonitor.main \
+  --models-dir NetworkMonitor/models \
+  --mappings-path DataPreprocessing/model_mappings/mappings.json \
+  --log-dir /opt/zeek/logs/current
+```
+
+Optional AbuseIPDB enrichment can be enabled without committing secrets:
+
+```bash
+export ABUSEIPDB_API_KEY="..."
+```
+
+## Test
+
+```bash
+ruff check .
+pytest
+```
+
+## Scope
+
+This is the revitalized public UCC 2024 IDS repository. The broader AICCC autonomous-agent cyber-defense system is implemented as a separate public project that integrates this IDS component with routing, malware analysis, auditability, and human oversight.
